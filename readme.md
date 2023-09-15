@@ -68,15 +68,15 @@ npm install camomile
 A standalone server.
 
 ```js
-const {Server} = require('camomile')
+import {Server} from 'camomile'
 
-const host = '127.0.0.1'
-const port = 1080
-const server = new Server({
-  HMACKey: process.env.CAMOMILE_HMAC_KEY,
-})
+const HMACKey = process.env.CAMOMILE_HMAC_KEY
 
-server.listen({host, port})
+if (!HMACKey) throw new Error('Missing `CAMOMILE_HMAC_KEY` in environment')
+
+const server = new Server({HMACKey})
+
+server.listen({host: '127.0.0.1', port: 1080})
 ```
 
 ## API
@@ -99,7 +99,7 @@ Name used for the `Via` HTTP header (`string`, default: `'camomile'`).
 
 #### `options.maxSize`
 
-Limit the maximum size of a resource in bytes (`number`, default: `null`).
+Limit the maximum size of a resource in bytes (`number`, default: `undefined`).
 
 The server responds with `404` and `Content-Length exceeded`
 if the resource is larger than the maximum size.
@@ -109,39 +109,43 @@ if the resource is larger than the maximum size.
 ### Example: integrate camomile into Express
 
 ```js
-const {Server} = require('camomile')
-const express = require('express')
+import express from 'express'
+import {Server} from 'camomile'
+
+const HMACKey = process.env.CAMOMILE_HMAC_KEY
+if (!HMACKey) throw new Error('Missing `CAMOMILE_HMAC_KEY` in environment')
 
 const host = '127.0.0.1'
 const port = 1080
 const app = express()
 const uploadApp = express()
-const camomile = new Server({
-  HMACKey: process.env.CAMOMILE_HMAC_KEY,
-})
+const camomile = new Server({HMACKey})
+uploadApp.all('*', camomile.handle.bind(camomile))
 
-uploadApp.all('*', server.handle.bind(server))
 app.use('/uploads', uploadApp)
 app.listen(port, host)
+
+console.log('Listening on `http://' + host + ':' + port + '/uploads/`')
 ```
 
 ### Example: integrate camomile into Koa
 
 ```js
-const http = require('node:http')
-const url = require('node:url')
-const Koa = require('koa')
-const {Server} = require('camomile')
+import http from 'node:http'
+import url from 'node:url'
+import {Server} from 'camomile'
+import Koa from 'koa'
 
+const HMACKey = process.env.CAMOMILE_HMAC_KEY
+if (!HMACKey) throw new Error('Missing `CAMOMILE_HMAC_KEY` in environment')
+
+const port = 1080
 const app = new Koa()
 const appCallback = app.callback()
-const port = 1080
-const camomile = new Server({
-  HMACKey: process.env.CAMOMILE_HMAC_KEY,
-})
+const camomile = new Server({HMACKey})
 
 const server = http.createServer((req, res) => {
-  const urlPath = url.parse(req.url).pathname
+  const urlPath = url.parse(req.url || '').pathname || ''
 
   // handle any requests with the `/files/*` pattern
   if (/^\/files\/.+/.test(urlPath.toLowerCase())) {
@@ -157,16 +161,18 @@ server.listen(port)
 ### Example: integrate camomile into Fastify
 
 ```js
-const fastify = require('fastify')({logger: true})
-const {Server} = require('camomile')
+import createFastify from 'fastify'
+import {Server} from 'camomile'
 
-const camomile = new Server({
-  HMACKey: process.env.CAMOMILE_HMAC_KEY,
-})
+const HMACKey = process.env.CAMOMILE_HMAC_KEY
+if (!HMACKey) throw new Error('Missing `CAMOMILE_HMAC_KEY` in environment')
+
+const fastify = createFastify({logger: true})
+const camomile = new Server({HMACKey})
 
 /**
- * add new content-type to fastify forewards request
- * without any parser to leave body untouched
+ * Add `content-type` so fastify forewards without a parser to the leave body untouched.
+ *
  * @see https://www.fastify.io/docs/latest/Reference/ContentTypeParser/
  */
 fastify.addContentTypeParser(
@@ -175,8 +181,9 @@ fastify.addContentTypeParser(
 )
 
 /**
- * let camomile handle preparation and filehandling requests
- * fastify exposes raw nodejs http req/res via .raw property
+ * Use camomile to handle preparation and filehandling requests.
+ * `.raw` gets the raw Node HTTP request and response objects.
+ *
  * @see https://www.fastify.io/docs/latest/Reference/Request/
  * @see https://www.fastify.io/docs/latest/Reference/Reply/#raw
  */
@@ -186,7 +193,8 @@ fastify.all('/files', (req, res) => {
 fastify.all('/files/*', (req, res) => {
   camomile.handle(req.raw, res.raw)
 })
-fastify.listen(3000, (err) => {
+
+fastify.listen({port: 3000}, (err) => {
   if (err) {
     fastify.log.error(err)
     process.exit(1)
