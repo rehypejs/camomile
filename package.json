@@ -33,6 +33,19 @@
     "test": "npm run build && npm run format && npm run test-api",
     "test-api": "node --test test.js"
   },
+  "prettier": {
+    "bracketSpacing": false,
+    "semi": false,
+    "singleQuote": true,
+    "tabWidth": 2,
+    "trailingComma": "none",
+    "useTabs": false
+  },
+  "remarkConfig": {
+    "plugins": [
+      "remark-preset-wooorm"
+    ]
+  },
   "dependencies": {
     "ipaddr.js": "^2.1.0",
     "undici": "^5.24.0"
