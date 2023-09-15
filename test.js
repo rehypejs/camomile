@@ -7,7 +7,7 @@ import {MockAgent, setGlobalDispatcher, fetch} from 'undici'
 // TODO: use published version of this plugin
 import {camo} from './rehype-github-image/camo.js'
 import {Server} from './index.js'
-import {DEFAULT_HEADERS} from './lib/constants.js'
+import {securityHeaders} from './lib/constants.js'
 
 const host = '127.0.0.1'
 const port = 1080
@@ -44,7 +44,7 @@ function closeTestServer(server) {
 
 /** @param {import('undici').Response} res */
 function testDefaultHeaders(res) {
-  Object.keys(DEFAULT_HEADERS).forEach((key) => {
+  Object.keys(securityHeaders).forEach((key) => {
     assert.ok(res.headers.has(key), key)
   })
 }

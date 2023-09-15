@@ -28,7 +28,8 @@
     "index.js"
   ],
   "scripts": {
-    "build": "tsc --build --clean && tsc --build",
+    "build": "npm run build:clean && tsc --build",
+    "build-clean": "tsc --build --clean",
     "format": "remark . -qfo && prettier . -w --log-level warn",
     "test": "npm run build && npm run format && npm run test-api",
     "test-api": "node --test test.js"
