@@ -1,6 +1,7 @@
 # comomile
 
-**camomile** is a Node.js HTTP proxy to route images through SSL, compatible with unified plugins, to safely embed user content on the web.
+**camomile** is a Node.js HTTP proxy to route images through SSL,
+compatible with unified plugins, to safely embed user content on the web.
 
 ## Contents
 
@@ -18,7 +19,6 @@
 *   [Types](#types)
 *   [Compatibility](#compatibility)
 *   [Contribute](#contribute)
-*   [Sponsor](#sponsor)
 *   [Acknowledgments](#acknowledgments)
 *   [License](#license)
 
@@ -27,19 +27,22 @@
 A Node.js HTTP proxy to route images through SSL,
 integrable in any Node.js server (even a front-end framework like Next.js).
 
-camomile works together with [`rehype-github-image`][], which does the following at build time:
+camomile works together with [`rehype-github-image`][],
+which does the following at build time:
 
 1.  The original URL in the content is parsed.
 2.  An [HMAC][] signature of the URL is generated.
 3.  The URL and HMAC are encoded.
-4.  The encoded URL and HMAC are placed into the expected format, creating the signed URL.
+4.  The encoded URL and HMAC are placed into the expected format,
+    creating the signed URL.
 5.  The signed URL replaces the original image URL.
 
 After your web app serves the content to the user, camomile takes over:
 
 1.  The client requests the signed URL from camomile.
-2.  camomile validates the [HMAC][], decodes the URL, then requests the content from
-    the origin server and streams it to the client.
+2.  camomile validates the [HMAC][], decodes the URL,
+    then requests the content from the origin server
+    and streams it to the client.
 
 ## When should I use this?
 
@@ -87,7 +90,8 @@ Creates a new camomile server with options.
 
 #### `options.HMACKey`
 
-The HMAC key to decrypt the URLs and used by [`rehype-github-image`][] (`string`, required).
+The HMAC key to decrypt the URLs and used by [`rehype-github-image`][]
+(`string`, required).
 
 #### `options.serverName`
 
@@ -97,7 +101,8 @@ Name used for the `Via` HTTP header (`string`, default: `'camomile'`).
 
 Limit the maximum size of a resource in bytes (`number`, default: `null`).
 
-The server responds with `404` and `Content-Length exceeded` if the resource is larger than the maximum size.
+The server responds with `404` and `Content-Length exceeded`
+if the resource is larger than the maximum size.
 
 ## Examples
 
@@ -218,7 +223,6 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 }
 ```
 
-
 ## Types
 
 This package is fully typed with [TypeScript][].
@@ -261,7 +265,7 @@ and maintained image proxy in Go.
 
 [`rehype-github-image`]: https://github.com/rehypejs/rehype-github/tree/main/packages/image
 
-[HMAC]: https://en.wikipedia.org/wiki/HMAC
+[hmac]: https://en.wikipedia.org/wiki/HMAC
 
 [`constants`]: https://rehypejs/camomile/tree/main/lib/constants.js
 
