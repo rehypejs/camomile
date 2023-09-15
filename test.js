@@ -152,7 +152,7 @@ describe('camo', () => {
       'https://avatars.githubusercontent.com/u/944406'
     )
     const res = await fetch(proxyUrl)
-    assert.strictEqual(res.status, 404)
+    assert.strictEqual(res.status, 413)
     assert.strictEqual(await res.text(), 'Content-Length exceeded')
     testDefaultHeaders(res)
   })
