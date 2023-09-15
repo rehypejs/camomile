@@ -21,7 +21,7 @@ const toProxyUrl = camo(addr, secret)
 function createTestServer() {
   return new Promise((resolve) => {
     const server = new Server({
-      HMACKey: secret,
+      secret,
       serverName: 'camo',
       maxSize: 0.5 * 1024 * 1024
     }).listen({

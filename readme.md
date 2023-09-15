@@ -99,7 +99,7 @@ Name used for the `Via` HTTP header (`string`, default: `'camomile'`).
 
 #### `options.maxSize`
 
-Limit the maximum size of a resource in bytes (`number`, default: `undefined`).
+Limit the maximum size of a resource in bytes (`number`, default: `100 * 1024 * 1024`).
 
 The server responds with `404` and `Content-Length exceeded`
 if the resource is larger than the maximum size.
