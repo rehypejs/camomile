@@ -138,24 +138,16 @@ import Koa from 'koa'
 
 const secret = process.env.CAMOMILE_SECRET
 if (!secret) throw new Error('Missing `CAMOMILE_SECRET` in environment')
-
 const port = 1080
 const app = new Koa()
-const appCallback = app.callback()
-const camomile = new Server({secret})
 
-const server = http.createServer((req, res) => {
-  const urlPath = url.parse(req.url || '').pathname || ''
-
-  // handle any requests with the `/files/*` pattern
-  if (/^\/files\/.+/.test(urlPath.toLowerCase())) {
-    return camomile.handle(req, res)
+app.use((ctx, next) => {
+  if (/^\/files\/.+/.test(ctx.path.toLowerCase())) {
+    return camomile.handle(ctx.req, ctx.res)
   }
-
-  appCallback(req, res)
+  return next()
 })
-
-server.listen(port)
+app.listen(port)
 ```
 
 ### Example: integrate camomile into Fastify
