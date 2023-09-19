@@ -57,7 +57,7 @@ Sometimes user content is served over HTTP, which is not secure:
 ## Install
 
 This package is [ESM only][esm].
-In Node.js (version 16+), install with [npm][]:
+In Node.js (version 18+), install with [npm][]:
 
 ```sh
 npm install camomile

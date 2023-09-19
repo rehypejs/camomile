@@ -48,14 +48,14 @@
     ]
   },
   "dependencies": {
-    "ipaddr.js": "^2.1.0",
-    "undici": "^5.24.0"
+    "ipaddr.js": "^2.0.0",
+    "undici": "^5.0.0"
   },
   "devDependencies": {
-    "@types/node": "^18.17.15",
-    "prettier": "^3.0.3",
+    "@types/node": "^18.0.0",
+    "prettier": "^3.0.0",
     "remark-cli": "^11.0.0",
-    "remark-preset-wooorm": "^9.1.0",
-    "typescript": "^5.2.2"
+    "remark-preset-wooorm": "^9.0.0",
+    "typescript": "^5.0.0"
   }
 }
