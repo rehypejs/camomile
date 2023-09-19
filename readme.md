@@ -70,11 +70,11 @@ A standalone server.
 ```js
 import {Server} from 'camomile'
 
-const HMACKey = process.env.CAMOMILE_HMAC_KEY
+const secret = process.env.CAMOMILE_SECRET
 
-if (!HMACKey) throw new Error('Missing `CAMOMILE_HMAC_KEY` in environment')
+if (!secret) throw new Error('Missing `CAMOMILE_SECRET` in environment')
 
-const server = new Server({HMACKey})
+const server = new Server({secret})
 
 server.listen({host: '127.0.0.1', port: 1080})
 ```
@@ -88,7 +88,7 @@ There is no default export.
 
 Creates a new camomile server with options.
 
-#### `options.HMACKey`
+#### `options.secret`
 
 The HMAC key to decrypt the URLs and used by [`rehype-github-image`][]
 (`string`, required).
@@ -112,14 +112,14 @@ if the resource is larger than the maximum size.
 import express from 'express'
 import {Server} from 'camomile'
 
-const HMACKey = process.env.CAMOMILE_HMAC_KEY
-if (!HMACKey) throw new Error('Missing `CAMOMILE_HMAC_KEY` in environment')
+const secret = process.env.CAMOMILE_SECRET
+if (!secret) throw new Error('Missing `CAMOMILE_SECRET` in environment')
 
 const host = '127.0.0.1'
 const port = 1080
 const app = express()
 const uploadApp = express()
-const camomile = new Server({HMACKey})
+const camomile = new Server({secret})
 uploadApp.all('*', camomile.handle.bind(camomile))
 
 app.use('/uploads', uploadApp)
@@ -136,13 +136,13 @@ import url from 'node:url'
 import {Server} from 'camomile'
 import Koa from 'koa'
 
-const HMACKey = process.env.CAMOMILE_HMAC_KEY
-if (!HMACKey) throw new Error('Missing `CAMOMILE_HMAC_KEY` in environment')
+const secret = process.env.CAMOMILE_SECRET
+if (!secret) throw new Error('Missing `CAMOMILE_SECRET` in environment')
 
 const port = 1080
 const app = new Koa()
 const appCallback = app.callback()
-const camomile = new Server({HMACKey})
+const camomile = new Server({secret})
 
 const server = http.createServer((req, res) => {
   const urlPath = url.parse(req.url || '').pathname || ''
@@ -164,11 +164,11 @@ server.listen(port)
 import createFastify from 'fastify'
 import {Server} from 'camomile'
 
-const HMACKey = process.env.CAMOMILE_HMAC_KEY
-if (!HMACKey) throw new Error('Missing `CAMOMILE_HMAC_KEY` in environment')
+const secret = process.env.CAMOMILE_SECRET
+if (!secret) throw new Error('Missing `CAMOMILE_SECRET` in environment')
 
 const fastify = createFastify({logger: true})
-const camomile = new Server({HMACKey})
+const camomile = new Server({secret})
 
 /**
  * Add `content-type` so fastify forewards without a parser to the leave body untouched.
@@ -223,7 +223,7 @@ export const config = {
 }
 
 const camomile = new Server({
-  HMACKey: process.env.CAMOMILE_HMAC_KEY,
+  secret: process.env.CAMOMILE_SECRET,
 })
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
