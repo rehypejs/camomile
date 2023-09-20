@@ -135,7 +135,7 @@ describe('camo', () => {
     testDefaultHeaders(res)
   })
 
-  test('should 400 for download over defined max size', async () => {
+  test('should 413 for download over defined max size', async () => {
     const size = 1 * 1024 * 1024
 
     mockAgent
