@@ -30,14 +30,15 @@ integrable in any Node.js server (even a front-end framework like Next.js).
 camomile works together with [`rehype-github-image`][],
 which does the following at build time:
 
-1.  The original URL in the content is parsed.
+1.  Finds all insecure HTTP image URLs.
 2.  An [HMAC][] signature of the URL is generated.
 3.  The URL and HMAC are encoded.
 4.  The encoded URL and HMAC are placed into the expected format,
     creating the signed URL.
 5.  The signed URL replaces the original image URL.
 
-After your web app serves the content to the user, camomile takes over:
+After your web app serves the content to the user,
+camomile takes over where needed:
 
 1.  The client requests the signed URL from camomile.
 2.  camomile validates the [HMAC][], decodes the URL,
