@@ -224,4 +224,40 @@ describe('camo', () => {
     assert.strictEqual((await res.blob()).size, 1024)
     testDefaultHeaders(res)
   })
+
+  test('should 200 for GET after following two redirects', async () => {
+    const pool = mockAgent.get('https://avatars.githubusercontent.com')
+
+    pool
+      .intercept({method: 'GET', path: '/u/944406'})
+      .reply(302, 'Moved Temporarily', {
+        headers: {
+          Location: 'https://avatars.githubusercontent.com/redirect1'
+        }
+      })
+    pool
+      .intercept({method: 'GET', path: '/redirect1'})
+      .reply(302, 'Moved Temporarily', {
+        headers: {
+          Location: 'https://avatars.githubusercontent.com/redirect2'
+        }
+      })
+    pool
+      .intercept({method: 'GET', path: 'redirect2'})
+      .reply(200, Buffer.alloc(1024), {
+        headers: {
+          'Content-Length': '1024',
+          'Content-Type': 'image/png'
+        }
+      })
+
+    const proxyUrl = toProxyUrl(
+      'https://avatars.githubusercontent.com/u/944406'
+    )
+    const res = await fetch(proxyUrl, {method: 'GET'})
+    assert.strictEqual(res.status, 200)
+    assert.strictEqual(res.headers.get('content-length'), '1024')
+    assert.strictEqual(res.headers.get('content-type'), 'image/png')
+    testDefaultHeaders(res)
+  })
 })
