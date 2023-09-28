@@ -6,7 +6,7 @@ import {MockAgent, setGlobalDispatcher, fetch} from 'undici'
 
 // TODO: use published version of this plugin
 import {camo} from './rehype-github-image/camo.js'
-import {Server} from './index.js'
+import {Camomile} from './index.js'
 import {securityHeaders} from './lib/constants.js'
 
 const host = '127.0.0.1'
@@ -16,11 +16,11 @@ const secret = 'myVerySecretSecret'
 const toProxyUrl = camo(addr, secret)
 
 /**
- * @returns {Promise<InstanceType<Server>>}
+ * @returns {Promise<InstanceType<Camomile>>}
  */
 function createTestServer() {
   return new Promise((resolve) => {
-    const server = new Server({
+    const server = new Camomile({
       secret,
       serverName: 'camo',
       maxSize: 0.5 * 1024 * 1024

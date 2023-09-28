@@ -1,1 +1,1 @@
-export {Server} from './lib/server.js'
+export {Camomile} from './lib/server.js'
