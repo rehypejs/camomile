@@ -10,7 +10,7 @@ compatible with unified plugins, to safely embed user content on the web.
 *   [Install](#install)
 *   [Use](#use)
 *   [API](#api)
-    *   [`new Server(options)`](#new-serveroptions)
+    *   [`new Camomile(options)`](#new-camomileoptions)
 *   [Examples](#examples)
     *   [Example: integrate camomile into Express](#example-integrate-camomile-into-express)
     *   [Example: integrate camomile into Koa](#example-integrate-camomile-into-koa)
@@ -69,23 +69,23 @@ npm install camomile
 A standalone server.
 
 ```js
-import {Server} from 'camomile'
+import {Camomile} from 'camomile'
 
 const secret = process.env.CAMOMILE_SECRET
 
 if (!secret) throw new Error('Missing `CAMOMILE_SECRET` in environment')
 
-const server = new Server({secret})
+const server = new Camomile({secret})
 
 server.listen({host: '127.0.0.1', port: 1080})
 ```
 
 ## API
 
-This package exports `Server` and all [`constants`][].
+This package exports `Camomile` and all [`constants`][].
 There is no default export.
 
-### `new Server(options)`
+### `new Camomile(options)`
 
 Creates a new camomile server with options.
 
@@ -111,7 +111,7 @@ if the resource is larger than the maximum size.
 
 ```js
 import express from 'express'
-import {Server} from 'camomile'
+import {Camomile} from 'camomile'
 
 const secret = process.env.CAMOMILE_SECRET
 if (!secret) throw new Error('Missing `CAMOMILE_SECRET` in environment')
@@ -120,7 +120,7 @@ const host = '127.0.0.1'
 const port = 1080
 const app = express()
 const uploadApp = express()
-const camomile = new Server({secret})
+const camomile = new Camomile({secret})
 uploadApp.all('*', camomile.handle.bind(camomile))
 
 app.use('/uploads', uploadApp)
@@ -134,7 +134,7 @@ console.log('Listening on `http://' + host + ':' + port + '/uploads/`')
 ```js
 import http from 'node:http'
 import url from 'node:url'
-import {Server} from 'camomile'
+import {Camomile} from 'camomile'
 import Koa from 'koa'
 
 const secret = process.env.CAMOMILE_SECRET
@@ -155,13 +155,13 @@ app.listen(port)
 
 ```js
 import createFastify from 'fastify'
-import {Server} from 'camomile'
+import {Camomile} from 'camomile'
 
 const secret = process.env.CAMOMILE_SECRET
 if (!secret) throw new Error('Missing `CAMOMILE_SECRET` in environment')
 
 const fastify = createFastify({logger: true})
-const camomile = new Server({secret})
+const camomile = new Camomile({secret})
 
 /**
  * Add `content-type` so fastify forewards without a parser to the leave body untouched.
@@ -203,7 +203,7 @@ Attach the camomile server handler to a Next.js route handler in an [optional ca
 
 ```ts
 import type {NextApiRequest, NextApiResponse} from 'next'
-import {Server} from 'camomile'
+import {Camomile} from 'camomile'
 
 /**
  * !Important. This will tell Next.js NOT Parse the body as camomile requires
@@ -215,7 +215,7 @@ export const config = {
   },
 }
 
-const camomile = new Server({
+const camomile = new Camomile({
   secret: process.env.CAMOMILE_SECRET,
 })
 
