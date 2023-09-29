@@ -227,6 +227,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 ## Types
 
 This package is fully typed with [TypeScript][].
+It exports the additional type [`Options`](#new-camomileoptions).
 
 ## Compatibility
 
