@@ -270,8 +270,6 @@ and maintained image proxy in Go.
 
 [hmac]: https://en.wikipedia.org/wiki/HMAC
 
-[`constants`]: https://rehypejs/camomile/tree/main/lib/constants.js
-
 [esm]: https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c
 
 [typescript]: https://www.typescriptlang.org
