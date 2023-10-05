@@ -57,6 +57,8 @@ Sometimes user content is served over HTTP, which is not secure:
 
 ## Install
 
+> **Note**: This package is not yet published to npm.
+
 This package is [ESM only][esm].
 In Node.js (version 18+), install with [npm][]:
 
@@ -82,8 +84,7 @@ server.listen({host: '127.0.0.1', port: 1080})
 
 ## API
 
-This package exports `Camomile` and all [`constants`][].
-There is no default export.
+This package exports `Camomile`.  There is no default export.
 
 ### `new Camomile(options)`
 
