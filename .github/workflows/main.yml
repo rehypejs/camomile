@@ -4,8 +4,8 @@ on:
   - push
 jobs:
   main:
-    name: ${{matrix.node}} on ${{matrix.os}}
-    runs-on: ${{matrix.os}}
+    name: ${{matrix.node}}
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
