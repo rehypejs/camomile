@@ -262,7 +262,7 @@ versions of Node.js.
 When we cut a new major release,
 we drop support for unmaintained versions of Node.
 This means we try to keep the current release line,
-`camomile@^0`,
+`camomile@^1`,
 compatible with Node.js 18.
 
 ## Contribute
