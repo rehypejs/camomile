@@ -4,12 +4,12 @@
   "description": "Node.js HTTP image proxy to route images through SSL",
   "license": "MIT",
   "keywords": [
-    "ssl",
-    "node",
-    "proxy",
     "camo",
     "camomile",
+    "node",
+    "proxy",
     "security",
+    "ssl",
     "unified"
   ],
   "repository": "rehypejs/camomile",
