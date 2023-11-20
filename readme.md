@@ -301,17 +301,17 @@ Thanks to [**@kytta**][github-kytta] for the npm package name `comomile`!
 
 [api-options]: #options
 
-[badge-build-image]: https://github.com/wooorm/dead-or-alive/workflows/main/badge.svg
+[badge-build-image]: https://github.com/rehypejs/camomile/actions/workflows/main.yml/badge.svg
 
-[badge-build-url]: https://github.com/wooorm/dead-or-alive/actions
+[badge-build-url]: https://github.com/rehypejs/camomile/actions
 
 [badge-chat-image]: https://img.shields.io/badge/chat-discussions-success.svg
 
 [badge-chat-url]: https://github.com/rehypejs/rehype/discussions
 
-[badge-coverage-image]: https://img.shields.io/codecov/c/github/wooorm/dead-or-alive.svg
+[badge-coverage-image]: https://img.shields.io/codecov/c/github/rehypejs/camomile.svg
 
-[badge-coverage-url]: https://codecov.io/github/wooorm/dead-or-alive
+[badge-coverage-url]: https://codecov.io/github/rehypejs/camomile
 
 [badge-downloads-image]: https://img.shields.io/npm/dm/dead-or-alive.svg
 
