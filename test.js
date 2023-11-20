@@ -77,7 +77,10 @@ describe('camo', () => {
     const proxyUrl = toProxyUrl('file:///etc/passwd')
     const res = await fetch(proxyUrl)
     assert.strictEqual(res.status, 400)
-    assert.strictEqual(await res.text(), 'Bad protocol')
+    assert.strictEqual(
+      await res.text(),
+      'Unexpected non-http protocol `file:`, expected `http:` or `https:`'
+    )
     testDefaultHeaders(res)
   })
 
@@ -108,7 +111,10 @@ describe('camo', () => {
     )
     const res = await fetch(proxyUrl)
     assert.strictEqual(res.status, 400)
-    assert.strictEqual(await res.text(), 'Empty content-type header')
+    assert.strictEqual(
+      await res.text(),
+      'Unexpected missing `Content-type` header in remote server response'
+    )
     testDefaultHeaders(res)
   })
 
@@ -128,7 +134,10 @@ describe('camo', () => {
     )
     const res = await fetch(proxyUrl)
     assert.strictEqual(res.status, 400)
-    assert.strictEqual(await res.text(), 'Unsupported content-type returned')
+    assert.strictEqual(
+      await res.text(),
+      'Unexpected non-image `Content-type` in remote server response, this might not be an image or it might not be supported by camomile'
+    )
     testDefaultHeaders(res)
   })
 
@@ -150,7 +159,10 @@ describe('camo', () => {
     )
     const res = await fetch(proxyUrl)
     assert.strictEqual(res.status, 413)
-    assert.strictEqual(await res.text(), 'Content-Length exceeded')
+    assert.strictEqual(
+      await res.text(),
+      'Unexpected too large `Content-Length`'
+    )
     testDefaultHeaders(res)
   })
 
