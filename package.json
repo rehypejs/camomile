@@ -2,6 +2,7 @@
   "name": "camomile",
   "version": "0.0.0",
   "description": "Node.js HTTP image proxy to route images through SSL",
+  "license": "MIT",
   "keywords": [
     "ssl",
     "node",
@@ -11,15 +12,16 @@
     "security",
     "unified"
   ],
-  "homepage": "https://unifiedjs.com",
-  "bugs": "https://github.com/rehypejs/camomile/issues",
   "repository": "rehypejs/camomile",
+  "bugs": "https://github.com/rehypejs/camomile/issues",
   "funding": {
     "type": "opencollective",
     "url": "https://opencollective.com/unified"
   },
-  "license": "MIT",
   "author": "Merlijn Vos <merlijn@soverin.net>",
+  "contributors": [
+    "Merlijn Vos <merlijn@soverin.net>"
+  ],
   "type": "module",
   "exports": "./index.js",
   "files": [
@@ -27,12 +29,22 @@
     "index.d.ts",
     "index.js"
   ],
+  "dependencies": {
+    "ipaddr.js": "^2.0.0",
+    "undici": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "prettier": "^3.0.0",
+    "remark-cli": "^11.0.0",
+    "remark-preset-wooorm": "^9.0.0",
+    "typescript": "^5.0.0"
+  },
   "scripts": {
-    "build": "npm run build-clean && tsc --build",
-    "build-clean": "tsc --build --clean",
-    "format": "remark . -qfo && prettier . -w --log-level warn",
+    "build": "tsc --build --clean && tsc --build",
+    "format": "remark . --frail --output --quiet && prettier . --log-level warn --write",
     "test": "npm run build && npm run format && npm run test-api",
-    "test-api": "node --test test.js"
+    "test-api": "node --conditions development test.js"
   },
   "prettier": {
     "bracketSpacing": false,
@@ -46,16 +58,5 @@
     "plugins": [
       "remark-preset-wooorm"
     ]
-  },
-  "dependencies": {
-    "ipaddr.js": "^2.0.0",
-    "undici": "^5.0.0"
-  },
-  "devDependencies": {
-    "@types/node": "^20.0.0",
-    "prettier": "^3.0.0",
-    "remark-cli": "^11.0.0",
-    "remark-preset-wooorm": "^9.0.0",
-    "typescript": "^5.0.0"
   }
 }
