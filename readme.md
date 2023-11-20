@@ -289,6 +289,8 @@ This project is a spiritual successor to `camo`.
 A lot of inspiration was also taken from [`go-camo`][github-cactus-camo],
 which is a modern and maintained image proxy in Go.
 
+Thanks to [**@kytta**][github-kytta] for the npm package name `comomile`!
+
 ## License
 
 [MIT][file-license] © [Merlijn Vos][github-murderlon]
@@ -338,6 +340,8 @@ which is a modern and maintained image proxy in Go.
 [github-dotfiles-support]: https://github.com/rehypejs/.github/blob/main/support.md
 
 [github-gist-esm]: https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c
+
+[github-kytta]: https://github.com/kytta
 
 [github-murderlon]: https://github.com/Murderlon
 
