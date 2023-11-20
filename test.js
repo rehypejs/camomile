@@ -2,7 +2,7 @@
  * @typedef {import('node:net').Server} Server
  */
 
-import assert from 'node:assert'
+import assert from 'node:assert/strict'
 import {Buffer} from 'node:buffer'
 import test, {describe, after, beforeEach, afterEach} from 'node:test'
 import {Camomile} from 'camomile'
@@ -41,7 +41,7 @@ describe('camo', () => {
   test('should 403 for url with invalid secret', async () => {
     const invalidProxy = camo(addr, 'invalid')
     const response = await fetch(invalidProxy('http://example.com/index.png'))
-    assert.strictEqual(response.status, 403)
+    assert.equal(response.status, 403)
     testDefaultHeaders(response)
   })
 
@@ -50,22 +50,22 @@ describe('camo', () => {
     const response = await fetch(proxyUrl.slice(0, proxyUrl.lastIndexOf('/')), {
       method: 'DELETE'
     })
-    assert.strictEqual(response.status, 405)
+    assert.equal(response.status, 405)
     testDefaultHeaders(response)
   })
 
   test('should 404 for url with only the digest', async () => {
     const proxyUrl = toProxyUrl('http://example.com/index.png')
     const response = await fetch(proxyUrl.slice(0, proxyUrl.lastIndexOf('/')))
-    assert.strictEqual(response.status, 404)
+    assert.equal(response.status, 404)
     testDefaultHeaders(response)
   })
 
   test('should 400 for unsupported protocol', async () => {
     const proxyUrl = toProxyUrl('file:///etc/passwd')
     const response = await fetch(proxyUrl)
-    assert.strictEqual(response.status, 400)
-    assert.strictEqual(
+    assert.equal(response.status, 400)
+    assert.equal(
       await response.text(),
       'Unexpected non-http protocol `file:`, expected `http:` or `https:`'
     )
@@ -75,11 +75,8 @@ describe('camo', () => {
   test('should 400 for non-host', async () => {
     const proxyUrl = toProxyUrl('http://some-address')
     const response = await fetch(proxyUrl)
-    assert.strictEqual(response.status, 400)
-    assert.strictEqual(
-      await response.text(),
-      'Could not look up host `some-address`'
-    )
+    assert.equal(response.status, 400)
+    assert.equal(await response.text(), 'Could not look up host `some-address`')
     testDefaultHeaders(response)
   })
 
@@ -89,8 +86,8 @@ describe('camo', () => {
     // Zero-prefix = octal number -> converted to 192.168.0.1
     const proxyUrl = toProxyUrl('http://0300.0250.0.01')
     const response = await fetch(proxyUrl)
-    assert.strictEqual(response.status, 400)
-    assert.strictEqual(await response.text(), 'Bad url host')
+    assert.equal(response.status, 400)
+    assert.equal(await response.text(), 'Bad url host')
     testDefaultHeaders(response)
   })
 
@@ -109,8 +106,8 @@ describe('camo', () => {
       'https://avatars.githubusercontent.com/u/944406'
     )
     const response = await fetch(proxyUrl)
-    assert.strictEqual(response.status, 400)
-    assert.strictEqual(
+    assert.equal(response.status, 400)
+    assert.equal(
       await response.text(),
       'Unexpected missing `Content-type` header in remote server response'
     )
@@ -132,8 +129,8 @@ describe('camo', () => {
       'https://avatars.githubusercontent.com/u/944406'
     )
     const response = await fetch(proxyUrl)
-    assert.strictEqual(response.status, 400)
-    assert.strictEqual(
+    assert.equal(response.status, 400)
+    assert.equal(
       await response.text(),
       'Unexpected non-image `Content-type` in remote server response, this might not be an image or it might not be supported by camomile'
     )
@@ -157,11 +154,8 @@ describe('camo', () => {
       'https://avatars.githubusercontent.com/u/944406'
     )
     const response = await fetch(proxyUrl)
-    assert.strictEqual(response.status, 413)
-    assert.strictEqual(
-      await response.text(),
-      'Unexpected too large `Content-Length`'
-    )
+    assert.equal(response.status, 413)
+    assert.equal(await response.text(), 'Unexpected too large `Content-Length`')
     testDefaultHeaders(response)
   })
 
@@ -180,9 +174,9 @@ describe('camo', () => {
       'https://avatars.githubusercontent.com/u/944406'
     )
     const response = await fetch(proxyUrl, {method: 'HEAD'})
-    assert.strictEqual(response.status, 204)
-    assert.strictEqual(response.headers.get('content-length'), '1024')
-    assert.strictEqual(response.headers.get('content-type'), 'image/png')
+    assert.equal(response.status, 204)
+    assert.equal(response.headers.get('content-length'), '1024')
+    assert.equal(response.headers.get('content-type'), 'image/png')
     testDefaultHeaders(response)
   })
 
@@ -225,12 +219,12 @@ describe('camo', () => {
     })
 
     assert.ok(headersOk, 'headers not correctly filtered')
-    assert.strictEqual(response.status, 200)
-    assert.strictEqual(response.headers.get('content-length'), '1024')
-    assert.strictEqual(response.headers.get('content-type'), 'image/png')
-    assert.strictEqual(response.headers.get('server'), null)
+    assert.equal(response.status, 200)
+    assert.equal(response.headers.get('content-length'), '1024')
+    assert.equal(response.headers.get('content-type'), 'image/png')
+    assert.equal(response.headers.get('server'), null)
     const blob = await response.blob()
-    assert.strictEqual(blob.size, 1024)
+    assert.equal(blob.size, 1024)
     testDefaultHeaders(response)
   })
 
@@ -264,9 +258,9 @@ describe('camo', () => {
       'https://avatars.githubusercontent.com/u/944406'
     )
     const response = await fetch(proxyUrl, {method: 'GET'})
-    assert.strictEqual(response.status, 200)
-    assert.strictEqual(response.headers.get('content-length'), '1024')
-    assert.strictEqual(response.headers.get('content-type'), 'image/png')
+    assert.equal(response.status, 200)
+    assert.equal(response.headers.get('content-length'), '1024')
+    assert.equal(response.headers.get('content-type'), 'image/png')
     testDefaultHeaders(response)
   })
 
@@ -280,8 +274,8 @@ describe('camo', () => {
     const response = await fetch(
       toProxyUrl('https://avatars.githubusercontent.com/u/944406')
     )
-    assert.strictEqual(response.status, 400)
-    assert.strictEqual(
+    assert.equal(response.status, 400)
+    assert.equal(
       await response.text(),
       'Unexpected missing `Location` header in redirect response by remote server'
     )
