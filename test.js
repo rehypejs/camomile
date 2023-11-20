@@ -1,46 +1,21 @@
-import test, {describe, after, beforeEach, afterEach} from 'node:test'
-import net from 'node:net'
+/**
+ * @typedef {import('node:net').Server} Server
+ */
+
 import assert from 'node:assert'
-
+import {Buffer} from 'node:buffer'
+import test, {describe, after, beforeEach, afterEach} from 'node:test'
+import {Camomile} from 'camomile'
 import {MockAgent, setGlobalDispatcher, fetch} from 'undici'
-
-// TODO: use published version of this plugin
-import {camo} from './rehype-github-image/camo.js'
-import {Camomile} from './index.js'
 import {securityHeaders} from './lib/constants.js'
+// To do: use published version of this plugin
+import {camo} from './rehype-github-image/camo.js'
 
 const host = '127.0.0.1'
 const port = 1080
-const addr = `http://${host}:${port}`
+const addr = 'http://' + host + ':' + port
 const secret = 'myVerySecretSecret'
 const toProxyUrl = camo(addr, secret)
-
-/**
- * @returns {Promise<net.Server>}
- */
-function createTestServer() {
-  return new Promise((resolve) => {
-    const server = new Camomile({secret}).listen({host, port})
-    server.on('listening', () => resolve(server))
-  })
-}
-
-/**
- * @param {net.Server} server
- * @returns {Promise<void>}
- */
-function closeTestServer(server) {
-  return new Promise((resolve, reject) => {
-    server.close((err) => (err ? reject(err) : resolve()))
-  })
-}
-
-/** @param {import('undici').Response} res */
-function testDefaultHeaders(res) {
-  Object.keys(securityHeaders).forEach((key) => {
-    assert.ok(res.headers.has(key), key)
-  })
-}
 
 const server = await createTestServer()
 
@@ -58,64 +33,65 @@ describe('camo', () => {
   test('should fail w/o secret', async () => {
     assert.throws(function () {
       // @ts-expect-error: check how missing options are handled.
+      // eslint-disable-next-line no-new
       new Camomile()
     }, /Expected `secret` in options/)
   })
 
   test('should 403 for url with invalid secret', async () => {
     const invalidProxy = camo(addr, 'invalid')
-    const res = await fetch(invalidProxy('http://example.com/index.png'))
-    assert.strictEqual(res.status, 403)
-    testDefaultHeaders(res)
+    const response = await fetch(invalidProxy('http://example.com/index.png'))
+    assert.strictEqual(response.status, 403)
+    testDefaultHeaders(response)
   })
 
   test('should 405 for non-head/get', async () => {
     const proxyUrl = toProxyUrl('http://example.com/index.png')
-    const res = await fetch(proxyUrl.slice(0, proxyUrl.lastIndexOf('/')), {
+    const response = await fetch(proxyUrl.slice(0, proxyUrl.lastIndexOf('/')), {
       method: 'DELETE'
     })
-    assert.strictEqual(res.status, 405)
-    testDefaultHeaders(res)
+    assert.strictEqual(response.status, 405)
+    testDefaultHeaders(response)
   })
 
   test('should 404 for url with only the digest', async () => {
     const proxyUrl = toProxyUrl('http://example.com/index.png')
-    const res = await fetch(proxyUrl.slice(0, proxyUrl.lastIndexOf('/')))
-    assert.strictEqual(res.status, 404)
-    testDefaultHeaders(res)
+    const response = await fetch(proxyUrl.slice(0, proxyUrl.lastIndexOf('/')))
+    assert.strictEqual(response.status, 404)
+    testDefaultHeaders(response)
   })
 
   test('should 400 for unsupported protocol', async () => {
     const proxyUrl = toProxyUrl('file:///etc/passwd')
-    const res = await fetch(proxyUrl)
-    assert.strictEqual(res.status, 400)
+    const response = await fetch(proxyUrl)
+    assert.strictEqual(response.status, 400)
     assert.strictEqual(
-      await res.text(),
+      await response.text(),
       'Unexpected non-http protocol `file:`, expected `http:` or `https:`'
     )
-    testDefaultHeaders(res)
+    testDefaultHeaders(response)
   })
 
   test('should 400 for non-host', async () => {
     const proxyUrl = toProxyUrl('http://some-address')
-    const res = await fetch(proxyUrl)
-    assert.strictEqual(res.status, 400)
+    const response = await fetch(proxyUrl)
+    assert.strictEqual(response.status, 400)
     assert.strictEqual(
-      await res.text(),
+      await response.text(),
       'Could not look up host `some-address`'
     )
-    testDefaultHeaders(res)
+    testDefaultHeaders(response)
   })
 
   // Testing all cases of SSRF would be endless, we just test one case to
   // make sure the library is used which handles all these cases.
   test('should 400 for private IP address as URL', async () => {
-    // zero-prefix = octal number -> converted to 192.168.0.1
+    // Zero-prefix = octal number -> converted to 192.168.0.1
     const proxyUrl = toProxyUrl('http://0300.0250.0.01')
-    const res = await fetch(proxyUrl)
-    assert.strictEqual(res.status, 400)
-    assert.strictEqual(await res.text(), 'Bad url host')
-    testDefaultHeaders(res)
+    const response = await fetch(proxyUrl)
+    assert.strictEqual(response.status, 400)
+    assert.strictEqual(await response.text(), 'Bad url host')
+    testDefaultHeaders(response)
   })
 
   test('should 400 for empty Content-Type', async () => {
@@ -132,13 +108,13 @@ describe('camo', () => {
     const proxyUrl = toProxyUrl(
       'https://avatars.githubusercontent.com/u/944406'
     )
-    const res = await fetch(proxyUrl)
-    assert.strictEqual(res.status, 400)
+    const response = await fetch(proxyUrl)
+    assert.strictEqual(response.status, 400)
     assert.strictEqual(
-      await res.text(),
+      await response.text(),
       'Unexpected missing `Content-type` header in remote server response'
     )
-    testDefaultHeaders(res)
+    testDefaultHeaders(response)
   })
 
   test('should 400 for unsupported Content-Type', async () => {
@@ -155,13 +131,13 @@ describe('camo', () => {
     const proxyUrl = toProxyUrl(
       'https://avatars.githubusercontent.com/u/944406'
     )
-    const res = await fetch(proxyUrl)
-    assert.strictEqual(res.status, 400)
+    const response = await fetch(proxyUrl)
+    assert.strictEqual(response.status, 400)
     assert.strictEqual(
-      await res.text(),
+      await response.text(),
       'Unexpected non-image `Content-type` in remote server response, this might not be an image or it might not be supported by camomile'
     )
-    testDefaultHeaders(res)
+    testDefaultHeaders(response)
   })
 
   test('should 413 for download over defined max size', async () => {
@@ -180,13 +156,13 @@ describe('camo', () => {
     const proxyUrl = toProxyUrl(
       'https://avatars.githubusercontent.com/u/944406'
     )
-    const res = await fetch(proxyUrl)
-    assert.strictEqual(res.status, 413)
+    const response = await fetch(proxyUrl)
+    assert.strictEqual(response.status, 413)
     assert.strictEqual(
-      await res.text(),
+      await response.text(),
       'Unexpected too large `Content-Length`'
     )
-    testDefaultHeaders(res)
+    testDefaultHeaders(response)
   })
 
   test('should 204 for HEAD with valid proxy url', async () => {
@@ -203,11 +179,11 @@ describe('camo', () => {
     const proxyUrl = toProxyUrl(
       'https://avatars.githubusercontent.com/u/944406'
     )
-    const res = await fetch(proxyUrl, {method: 'HEAD'})
-    assert.strictEqual(res.status, 204)
-    assert.strictEqual(res.headers.get('content-length'), '1024')
-    assert.strictEqual(res.headers.get('content-type'), 'image/png')
-    testDefaultHeaders(res)
+    const response = await fetch(proxyUrl, {method: 'HEAD'})
+    assert.strictEqual(response.status, 204)
+    assert.strictEqual(response.headers.get('content-length'), '1024')
+    assert.strictEqual(response.headers.get('content-type'), 'image/png')
+    testDefaultHeaders(response)
   })
 
   test('should 200 for GET with valid proxy url with filtered headers', async () => {
@@ -215,12 +191,12 @@ describe('camo', () => {
     mockAgent
       .get('https://avatars.githubusercontent.com')
       .intercept({method: 'GET', path: '/u/944406'})
-      .reply((req) => {
+      .reply((request) => {
         if (
           // @ts-ignore
-          !req.headers['X-Forwarded-For'] &&
+          !request.headers['X-Forwarded-For'] &&
           // @ts-ignore
-          req.headers['Cache-Control'] === 'no-cache'
+          request.headers['Cache-Control'] === 'no-cache'
         ) {
           headersOk = true
         }
@@ -241,7 +217,7 @@ describe('camo', () => {
     const proxyUrl = toProxyUrl(
       'https://avatars.githubusercontent.com/u/944406'
     )
-    const res = await fetch(proxyUrl, {
+    const response = await fetch(proxyUrl, {
       headers: {
         'Cache-Control': 'no-cache',
         'X-Forwarded-For': '2001:db8:85a3:8d3:1319:8a2e:370:7348'
@@ -249,12 +225,13 @@ describe('camo', () => {
     })
 
     assert.ok(headersOk, 'headers not correctly filtered')
-    assert.strictEqual(res.status, 200)
-    assert.strictEqual(res.headers.get('content-length'), '1024')
-    assert.strictEqual(res.headers.get('content-type'), 'image/png')
-    assert.strictEqual(res.headers.get('server'), null)
-    assert.strictEqual((await res.blob()).size, 1024)
-    testDefaultHeaders(res)
+    assert.strictEqual(response.status, 200)
+    assert.strictEqual(response.headers.get('content-length'), '1024')
+    assert.strictEqual(response.headers.get('content-type'), 'image/png')
+    assert.strictEqual(response.headers.get('server'), null)
+    const blob = await response.blob()
+    assert.strictEqual(blob.size, 1024)
+    testDefaultHeaders(response)
   })
 
   test('should 200 for GET after following two redirects', async () => {
@@ -286,11 +263,11 @@ describe('camo', () => {
     const proxyUrl = toProxyUrl(
       'https://avatars.githubusercontent.com/u/944406'
     )
-    const res = await fetch(proxyUrl, {method: 'GET'})
-    assert.strictEqual(res.status, 200)
-    assert.strictEqual(res.headers.get('content-length'), '1024')
-    assert.strictEqual(res.headers.get('content-type'), 'image/png')
-    testDefaultHeaders(res)
+    const response = await fetch(proxyUrl, {method: 'GET'})
+    assert.strictEqual(response.status, 200)
+    assert.strictEqual(response.headers.get('content-length'), '1024')
+    assert.strictEqual(response.headers.get('content-type'), 'image/png')
+    testDefaultHeaders(response)
   })
 
   test('should 400 for redirect wo `Location`', async () => {
@@ -300,14 +277,43 @@ describe('camo', () => {
       .intercept({method: 'GET', path: '/u/944406'})
       .reply(302, 'Moved Temporarily', {headers: {}})
 
-    const res = await fetch(
+    const response = await fetch(
       toProxyUrl('https://avatars.githubusercontent.com/u/944406')
     )
-    assert.strictEqual(res.status, 400)
+    assert.strictEqual(response.status, 400)
     assert.strictEqual(
-      await res.text(),
+      await response.text(),
       'Unexpected missing `Location` header in redirect response by remote server'
     )
-    testDefaultHeaders(res)
+    testDefaultHeaders(response)
   })
 })
+
+/**
+ * @returns {Promise<Server>}
+ */
+function createTestServer() {
+  return new Promise((resolve) => {
+    const server = new Camomile({secret}).listen({host, port})
+    server.on('listening', () => resolve(server))
+  })
+}
+
+/**
+ * @param {Server} server
+ * @returns {Promise<undefined>}
+ */
+function closeTestServer(server) {
+  return new Promise((resolve, reject) => {
+    server.close((error) => (error ? reject(error) : resolve(undefined)))
+  })
+}
+
+/**
+ * @param {Response} response
+ */
+function testDefaultHeaders(response) {
+  for (const key of Object.keys(securityHeaders)) {
+    assert.ok(response.headers.has(key), key)
+  }
+}
