@@ -1,7 +1,15 @@
 # comomile
 
+[![Build][badge-build-image]][badge-build-url]
+[![Coverage][badge-coverage-image]][badge-coverage-url]
+[![Downloads][badge-downloads-image]][badge-downloads-url]
+[![Sponsors][badge-funding-sponsors-image]][badge-funding-url]
+[![Backers][badge-funding-backers-image]][badge-funding-url]
+[![Chat][badge-chat-image]][badge-chat-url]
+
 **camomile** is a Node.js HTTP proxy to route images through SSL,
-compatible with unified plugins, to safely embed user content on the web.
+compatible with unified plugins,
+to safely embed user content on the web.
 
 ## Contents
 
@@ -11,12 +19,12 @@ compatible with unified plugins, to safely embed user content on the web.
 *   [Use](#use)
 *   [API](#api)
     *   [`new Camomile(options)`](#new-camomileoptions)
+    *   [`Options`](#options)
 *   [Examples](#examples)
     *   [Example: integrate camomile into Express](#example-integrate-camomile-into-express)
     *   [Example: integrate camomile into Koa](#example-integrate-camomile-into-koa)
     *   [Example: integrate camomile into Fastify](#example-integrate-camomile-into-fastify)
     *   [Example: integrate camomile into Next.js](#example-integrate-camomile-into-nextjs)
-*   [Types](#types)
 *   [Compatibility](#compatibility)
 *   [Contribute](#contribute)
 *   [Acknowledgments](#acknowledgments)
@@ -24,51 +32,51 @@ compatible with unified plugins, to safely embed user content on the web.
 
 ## What is this?
 
-A Node.js HTTP proxy to route images through SSL,
-integrable in any Node.js server (even a front-end framework like Next.js).
+This is a Node.js HTTP proxy to route images through SSL,
+integrable in any Node.js server such as Express, Koa, Fastify, or Next.js.
 
-camomile works together with [`rehype-github-image`][],
+camomile works together with [rehype-github-image][github-rehype-github-image],
 which does the following at build time:
 
-1.  Finds all insecure HTTP image URLs.
-2.  An [HMAC][] signature of the URL is generated.
-3.  The URL and HMAC are encoded.
-4.  The encoded URL and HMAC are placed into the expected format,
-    creating the signed URL.
-5.  The signed URL replaces the original image URL.
+1.  find all insecure HTTP image URLs in content
+2.  generate [HMAC][wikipedia-hmac] signature of each URL
+3.  replace the URL with a signed URL containing the encoded URL and HMAC
 
-After your web app serves the content to the user,
-camomile takes over where needed:
+When a user visits your app and views the content:
 
-1.  The client requests the signed URL from camomile.
-2.  camomile validates the [HMAC][], decodes the URL,
-    then requests the content from the origin server
-    and streams it to the client.
+1.  their browser requests the URLs going to your server
+2.  camomile validates the HMAC,
+    decodes the URL,
+    requests the content from the origin server without sensitive headers,
+    and streams it to the client
 
 ## When should I use this?
 
-When you want to embed user content on the web in a safe way.
-Sometimes user content is served over HTTP, which is not secure:
+Use this when you want to embed user content on the web in a safe way.
+Sometimes user content is served over HTTP,
+which is not secure:
 
 > An HTTPS page that includes content fetched using cleartext HTTP is called a
-> mixed content page.  Pages like this are only partially encrypted, leaving the
-> unencrypted content accessible to sniffers and man-in-the-middle attackers.
-> — [MDN](https://developer.mozilla.org/en-US/docs/Web/Security/Mixed_content)
+> mixed content page.
+> Pages like this are only partially encrypted,
+> leaving the unencrypted content accessible to sniffers and man-in-the-middle
+> attackers.
+>
+> — [MDN][mdn-mixed-content]
+
+This also prevents information about your users leaking to other servers.
 
 ## Install
 
-> **Note**: This package is not yet published to npm.
-
-This package is [ESM only][esm].
-In Node.js (version 18+), install with [npm][]:
+This package is [ESM only][github-gist-esm].
+In Node.js (version 18+),
+install with [npm][npm-install]:
 
 ```sh
 npm install camomile
 ```
 
 ## Use
-
-A standalone server.
 
 ```js
 import process from 'node:process'
@@ -85,27 +93,39 @@ server.listen({host: '127.0.0.1', port: 1080})
 
 ## API
 
-This package exports `Camomile`.  There is no default export.
+This package exports the identifier
+[`Camomile`][api-camomile].
+It exports the [TypeScript][] type
+[`Options`][api-options].
+There is no default export.
 
 ### `new Camomile(options)`
 
-Creates a new camomile server with options.
+Create a new camomile server with options.
 
-#### `options.secret`
+###### Parameters
 
-The HMAC key to decrypt the URLs and used by [`rehype-github-image`][]
-(`string`, required).
+*   `options` ([`Options`][api-options], required)
+    — configuration
 
-#### `options.serverName`
+###### Returns
 
-Name used for the `Via` HTTP header (`string`, default: `'camomile'`).
+Server.
 
-#### `options.maxSize`
+### `Options`
 
-Limit the maximum size of a resource in bytes (`number`, default: `100 * 1024 * 1024`).
+Configuration (TypeScript type).
 
-The server responds with `404` and `Content-Length exceeded`
-if the resource is larger than the maximum size.
+###### Fields
+
+*   `maxSize` (`number`, default: `100 * 1024 * 1024`)
+    — max size in bytes per resource to download;
+    a `413` is sent if the resource is larger than the maximum size
+*   `secret` (`string`, **required**)
+    — HMAC key to decrypt the URLs and used by
+    [`rehype-github-image`][github-rehype-github-image]
+*   `serverName` (`string`, default: `'camomile'`)
+    — server name sent in `Via`
 
 ## Examples
 
@@ -211,13 +231,9 @@ Attach the camomile server handler to a Next.js route handler in an [optional ca
 `/pages/api/upload/[[...file]].ts`
 
 ```ts
-/**
- * @typedef {import('next').NextApiRequest} NextApiRequest
- * @typedef {import('next').NextApiResponse} NextApiResponse
- */
-
 import process from 'node:process'
 import {Camomile} from 'camomile'
+import type {NextApiRequest, NextApiResponse} from 'next'
 
 const secret = process.env.CAMOMILE_SECRET
 if (!secret) throw new Error('Missing `CAMOMILE_SECRET` in environment')
@@ -230,81 +246,107 @@ export const config = {api: {bodyParser: false}}
 
 const camomile = new Camomile({secret})
 
-/**
- * @param {NextApiRequest} request
- * @param {NextApiResponse} response
- * @returns
- */
-export default function handler(request, response) {
+export default async function handler(
+  request: NextApiRequest,
+  response: NextApiResponse
+) {
   return camomile.handle(request, response)
 }
 ```
-
-## Types
-
-This package is fully typed with [TypeScript][].
-It exports the additional type [`Options`](#new-camomileoptions).
 
 ## Compatibility
 
 Projects maintained by the unified collective are compatible with maintained
 versions of Node.js.
 
-When we cut a new major release, we drop support for unmaintained versions of
-Node.
+When we cut a new major release,
+we drop support for unmaintained versions of Node.
+This means we try to keep the current release line,
+`camomile@^0`,
+compatible with Node.js 18.
 
 ## Contribute
 
-See [`contributing.md`][contributing] in [`unifiedjs/.github`][health] for ways
+See [`contributing.md`][github-dotfiles-contributing] in
+[`rehypejs/.github`][github-dotfiles-health] for ways
 to get started.
-See [`support.md`][support] for ways to get help.
+See [`support.md`][github-dotfiles-support] for ways to get help.
 
-This project has a [code of conduct][coc].
+This project has a [code of conduct][github-dotfiles-coc].
 By interacting with this repository, organization, or community you agree to
 abide by its terms.
 
-For info on how to submit a security report, see our
-[security policy][security].
+For info on how to submit a security report,
+see our [security policy][github-dotfiles-security].
 
 ## Acknowledgments
 
-In 2010 GitHub introduced [camo][], a similar server in CoffeeScript,
+In 2010 GitHub introduced [camo][github-atmos-camo],
+a similar server in CoffeeScript,
 which is now deprecated and in public archive.
 This project is a spiritual successor to `camo`.
 
-A lot of inspiration was also taken from [go-camo][], which is a modern
-and maintained image proxy in Go.
+A lot of inspiration was also taken from [`go-camo`][github-cactus-camo],
+which is a modern and maintained image proxy in Go.
 
 ## License
 
-[MIT][license] © [Merlijn Vos][author]
+[MIT][file-license] © [Merlijn Vos][github-murderlon]
 
 <!-- Definitions -->
 
-[`rehype-github-image`]: https://github.com/rehypejs/rehype-github/tree/main/packages/image
+[api-camomile]: #new-camomileoptions
 
-[hmac]: https://en.wikipedia.org/wiki/HMAC
+[api-options]: #options
 
-[esm]: https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c
+[badge-build-image]: https://github.com/wooorm/dead-or-alive/workflows/main/badge.svg
+
+[badge-build-url]: https://github.com/wooorm/dead-or-alive/actions
+
+[badge-chat-image]: https://img.shields.io/badge/chat-discussions-success.svg
+
+[badge-chat-url]: https://github.com/rehypejs/rehype/discussions
+
+[badge-coverage-image]: https://img.shields.io/codecov/c/github/wooorm/dead-or-alive.svg
+
+[badge-coverage-url]: https://codecov.io/github/wooorm/dead-or-alive
+
+[badge-downloads-image]: https://img.shields.io/npm/dm/dead-or-alive.svg
+
+[badge-downloads-url]: https://www.npmjs.com/package/dead-or-alive
+
+[badge-funding-backers-image]: https://opencollective.com/unified/backers/badge.svg
+
+[badge-funding-sponsors-image]: https://opencollective.com/unified/sponsors/badge.svg
+
+[badge-funding-url]: https://opencollective.com/unified
+
+[file-license]: license
+
+[github-atmos-camo]: https://github.com/atmos/camo
+
+[github-cactus-camo]: https://github.com/cactus/go-camo
+
+[github-dotfiles-coc]: https://github.com/rehypejs/.github/blob/main/code-of-conduct.md
+
+[github-dotfiles-contributing]: https://github.com/rehypejs/.github/blob/main/contributing.md
+
+[github-dotfiles-health]: https://github.com/rehypejs/.github
+
+[github-dotfiles-security]: https://github.com/rehypejs/.github/blob/main/security.md
+
+[github-dotfiles-support]: https://github.com/rehypejs/.github/blob/main/support.md
+
+[github-gist-esm]: https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c
+
+[github-murderlon]: https://github.com/Murderlon
+
+[github-rehype-github-image]: https://github.com/rehypejs/rehype-github/tree/main/packages/image
+
+[mdn-mixed-content]: https://developer.mozilla.org/en-US/docs/Web/Security/Mixed_content
+
+[npm-install]: https://docs.npmjs.com/cli/install
 
 [typescript]: https://www.typescriptlang.org
 
-[health]: https://github.com/unifiedjs/.github
-
-[contributing]: https://github.com/unifiedjs/.github/blob/main/contributing.md
-
-[support]: https://github.com/unifiedjs/.github/blob/main/support.md
-
-[coc]: https://github.com/unifiedjs/.github/blob/main/code-of-conduct.md
-
-[security]: https://github.com/unifiedjs/.github/blob/main/security.md
-
-[license]: license
-
-[author]: https://github.com/Murderlon
-
-[npm]: https://docs.npmjs.com/cli/install
-
-[camo]: https://github.com/atmos/camo
-
-[go-camo]: https://github.com/cactus/go-camo
+[wikipedia-hmac]: https://en.wikipedia.org/wiki/HMAC
