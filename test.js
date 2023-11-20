@@ -20,11 +20,7 @@ const toProxyUrl = camo(addr, secret)
  */
 function createTestServer() {
   return new Promise((resolve) => {
-    const server = new Camomile({
-      secret,
-      serverName: 'camo',
-      maxSize: 0.5 * 1024 * 1024
-    }).listen({host, port})
+    const server = new Camomile({secret}).listen({host, port})
     server.on('listening', () => resolve(server))
   })
 }
@@ -59,10 +55,26 @@ describe('camo', () => {
   afterEach(async () => mockAgent.close())
   after(async () => closeTestServer(server))
 
+  test('should fail w/o secret', async () => {
+    assert.throws(function () {
+      // @ts-expect-error: check how missing options are handled.
+      new Camomile()
+    }, /Expected `secret` in options/)
+  })
+
   test('should 403 for url with invalid secret', async () => {
     const invalidProxy = camo(addr, 'invalid')
     const res = await fetch(invalidProxy('http://example.com/index.png'))
     assert.strictEqual(res.status, 403)
+    testDefaultHeaders(res)
+  })
+
+  test('should 405 for non-head/get', async () => {
+    const proxyUrl = toProxyUrl('http://example.com/index.png')
+    const res = await fetch(proxyUrl.slice(0, proxyUrl.lastIndexOf('/')), {
+      method: 'DELETE'
+    })
+    assert.strictEqual(res.status, 405)
     testDefaultHeaders(res)
   })
 
@@ -80,6 +92,17 @@ describe('camo', () => {
     assert.strictEqual(
       await res.text(),
       'Unexpected non-http protocol `file:`, expected `http:` or `https:`'
+    )
+    testDefaultHeaders(res)
+  })
+
+  test('should 400 for non-host', async () => {
+    const proxyUrl = toProxyUrl('http://some-address')
+    const res = await fetch(proxyUrl)
+    assert.strictEqual(res.status, 400)
+    assert.strictEqual(
+      await res.text(),
+      'Could not look up host `some-address`'
     )
     testDefaultHeaders(res)
   })
@@ -142,7 +165,7 @@ describe('camo', () => {
   })
 
   test('should 413 for download over defined max size', async () => {
-    const size = 1 * 1024 * 1024
+    const size = 100 * 1024 * 1024 + 1
 
     mockAgent
       .get('https://avatars.githubusercontent.com')
@@ -267,6 +290,24 @@ describe('camo', () => {
     assert.strictEqual(res.status, 200)
     assert.strictEqual(res.headers.get('content-length'), '1024')
     assert.strictEqual(res.headers.get('content-type'), 'image/png')
+    testDefaultHeaders(res)
+  })
+
+  test('should 400 for redirect wo `Location`', async () => {
+    const pool = mockAgent.get('https://avatars.githubusercontent.com')
+
+    pool
+      .intercept({method: 'GET', path: '/u/944406'})
+      .reply(302, 'Moved Temporarily', {headers: {}})
+
+    const res = await fetch(
+      toProxyUrl('https://avatars.githubusercontent.com/u/944406')
+    )
+    assert.strictEqual(res.status, 400)
+    assert.strictEqual(
+      await res.text(),
+      'Unexpected missing `Location` header in redirect response by remote server'
+    )
     testDefaultHeaders(res)
   })
 })
