@@ -71,6 +71,7 @@ npm install camomile
 A standalone server.
 
 ```js
+import process from 'node:process'
 import {Camomile} from 'camomile'
 
 const secret = process.env.CAMOMILE_SECRET
@@ -111,19 +112,20 @@ if the resource is larger than the maximum size.
 ### Example: integrate camomile into Express
 
 ```js
-import express from 'express'
+import process from 'node:process'
 import {Camomile} from 'camomile'
+import express from 'express'
 
 const secret = process.env.CAMOMILE_SECRET
 if (!secret) throw new Error('Missing `CAMOMILE_SECRET` in environment')
 
-const host = '127.0.0.1'
-const port = 1080
-const app = express()
 const uploadApp = express()
 const camomile = new Camomile({secret})
 uploadApp.all('*', camomile.handle.bind(camomile))
 
+const host = '127.0.0.1'
+const port = 1080
+const app = express()
 app.use('/uploads', uploadApp)
 app.listen(port, host)
 
@@ -133,30 +135,34 @@ console.log('Listening on `http://' + host + ':' + port + '/uploads/`')
 ### Example: integrate camomile into Koa
 
 ```js
-import http from 'node:http'
-import url from 'node:url'
+import process from 'node:process'
 import {Camomile} from 'camomile'
 import Koa from 'koa'
 
 const secret = process.env.CAMOMILE_SECRET
 if (!secret) throw new Error('Missing `CAMOMILE_SECRET` in environment')
+const camomile = new Camomile({secret})
+
 const port = 1080
 const app = new Koa()
 
-app.use((ctx, next) => {
+app.use(function (ctx, next) {
   if (/^\/files\/.+/.test(ctx.path.toLowerCase())) {
     return camomile.handle(ctx.req, ctx.res)
   }
+
   return next()
 })
+
 app.listen(port)
 ```
 
 ### Example: integrate camomile into Fastify
 
 ```js
-import createFastify from 'fastify'
+import process from 'node:process'
 import {Camomile} from 'camomile'
+import createFastify from 'fastify'
 
 const secret = process.env.CAMOMILE_SECRET
 if (!secret) throw new Error('Missing `CAMOMILE_SECRET` in environment')
@@ -171,7 +177,9 @@ const camomile = new Camomile({secret})
  */
 fastify.addContentTypeParser(
   'application/offset+octet-stream',
-  (request, payload, done) => done(null)
+  function (request, payload, done) {
+    done(null)
+  }
 )
 
 /**
@@ -181,16 +189,16 @@ fastify.addContentTypeParser(
  * @see https://www.fastify.io/docs/latest/Reference/Request/
  * @see https://www.fastify.io/docs/latest/Reference/Reply/#raw
  */
-fastify.all('/files', (req, res) => {
-  camomile.handle(req.raw, res.raw)
+fastify.all('/files', function (request, response) {
+  camomile.handle(request.raw, response.raw)
 })
-fastify.all('/files/*', (req, res) => {
-  camomile.handle(req.raw, res.raw)
+fastify.all('/files/*', function (request, response) {
+  camomile.handle(request.raw, response.raw)
 })
 
-fastify.listen({port: 3000}, (err) => {
-  if (err) {
-    fastify.log.error(err)
+fastify.listen({port: 3000}, function (error) {
+  if (error) {
+    fastify.log.error(error)
     process.exit(1)
   }
 })
@@ -203,25 +211,32 @@ Attach the camomile server handler to a Next.js route handler in an [optional ca
 `/pages/api/upload/[[...file]].ts`
 
 ```ts
-import type {NextApiRequest, NextApiResponse} from 'next'
+/**
+ * @typedef {import('next').NextApiRequest} NextApiRequest
+ * @typedef {import('next').NextApiResponse} NextApiResponse
+ */
+
+import process from 'node:process'
 import {Camomile} from 'camomile'
 
+const secret = process.env.CAMOMILE_SECRET
+if (!secret) throw new Error('Missing `CAMOMILE_SECRET` in environment')
+
 /**
- * !Important. This will tell Next.js NOT Parse the body as camomile requires
+ * Important: this tells Next.js not to parse the body, as camomile requires
  * @see https://nextjs.org/docs/api-routes/request-helpers
  */
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-}
+export const config = {api: {bodyParser: false}}
 
-const camomile = new Camomile({
-  secret: process.env.CAMOMILE_SECRET,
-})
+const camomile = new Camomile({secret})
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  return camomile.handle(req, res)
+/**
+ * @param {NextApiRequest} request
+ * @param {NextApiResponse} response
+ * @returns
+ */
+export default function handler(request, response) {
+  return camomile.handle(request, response)
 }
 ```
 
