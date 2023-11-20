@@ -16,7 +16,7 @@ const secret = 'myVerySecretSecret'
 const toProxyUrl = camo(addr, secret)
 
 /**
- * @returns {Promise<InstanceType<Camomile>>}
+ * @returns {Promise<net.Server>}
  */
 function createTestServer() {
   return new Promise((resolve) => {
@@ -24,10 +24,7 @@ function createTestServer() {
       secret,
       serverName: 'camo',
       maxSize: 0.5 * 1024 * 1024
-    }).listen({
-      host,
-      port
-    })
+    }).listen({host, port})
     server.on('listening', () => resolve(server))
   })
 }

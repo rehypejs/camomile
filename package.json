@@ -38,10 +38,11 @@
     "prettier": "^3.0.0",
     "remark-cli": "^11.0.0",
     "remark-preset-wooorm": "^9.0.0",
+    "type-coverage": "^2.0.0",
     "typescript": "^5.0.0"
   },
   "scripts": {
-    "build": "tsc --build --clean && tsc --build",
+    "build": "tsc --build --clean && tsc --build && type-coverage",
     "format": "remark . --frail --output --quiet && prettier . --log-level warn --write",
     "test": "npm run build && npm run format && npm run test-api",
     "test-api": "node --conditions development test.js"
@@ -58,5 +59,11 @@
     "plugins": [
       "remark-preset-wooorm"
     ]
+  },
+  "typeCoverage": {
+    "atLeast": 100,
+    "detail": true,
+    "ignoreCatch": true,
+    "strict": true
   }
 }
