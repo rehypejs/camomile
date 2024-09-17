@@ -13,22 +13,22 @@ to safely embed user content on the web.
 
 ## Contents
 
-*   [What is this?](#what-is-this)
-*   [When should I use this?](#when-should-i-use-this)
-*   [Install](#install)
-*   [Use](#use)
-*   [API](#api)
-    *   [`new Camomile(options)`](#new-camomileoptions)
-    *   [`Options`](#options)
-*   [Examples](#examples)
-    *   [Example: integrate camomile into Express](#example-integrate-camomile-into-express)
-    *   [Example: integrate camomile into Koa](#example-integrate-camomile-into-koa)
-    *   [Example: integrate camomile into Fastify](#example-integrate-camomile-into-fastify)
-    *   [Example: integrate camomile into Next.js](#example-integrate-camomile-into-nextjs)
-*   [Compatibility](#compatibility)
-*   [Contribute](#contribute)
-*   [Acknowledgments](#acknowledgments)
-*   [License](#license)
+* [What is this?](#what-is-this)
+* [When should I use this?](#when-should-i-use-this)
+* [Install](#install)
+* [Use](#use)
+* [API](#api)
+  * [`new Camomile(options)`](#new-camomileoptions)
+  * [`Options`](#options)
+* [Examples](#examples)
+  * [Example: integrate camomile into Express](#example-integrate-camomile-into-express)
+  * [Example: integrate camomile into Koa](#example-integrate-camomile-into-koa)
+  * [Example: integrate camomile into Fastify](#example-integrate-camomile-into-fastify)
+  * [Example: integrate camomile into Next.js](#example-integrate-camomile-into-nextjs)
+* [Compatibility](#compatibility)
+* [Contribute](#contribute)
+* [Acknowledgments](#acknowledgments)
+* [License](#license)
 
 ## What is this?
 
@@ -38,17 +38,17 @@ integrable in any Node.js server such as Express, Koa, Fastify, or Next.js.
 camomile works together with [rehype-github-image][github-rehype-github-image],
 which does the following at build time:
 
-1.  find all insecure HTTP image URLs in content
-2.  generate [HMAC][wikipedia-hmac] signature of each URL
-3.  replace the URL with a signed URL containing the encoded URL and HMAC
+1. find all insecure HTTP image URLs in content
+2. generate [HMAC][wikipedia-hmac] signature of each URL
+3. replace the URL with a signed URL containing the encoded URL and HMAC
 
 When a user visits your app and views the content:
 
-1.  their browser requests the URLs going to your server
-2.  camomile validates the HMAC,
-    decodes the URL,
-    requests the content from the origin server without sensitive headers,
-    and streams it to the client
+1. their browser requests the URLs going to your server
+2. camomile validates the HMAC,
+   decodes the URL,
+   requests the content from the origin server without sensitive headers,
+   and streams it to the client
 
 ## When should I use this?
 
@@ -105,8 +105,8 @@ Create a new camomile server with options.
 
 ###### Parameters
 
-*   `options` ([`Options`][api-options], required)
-    — configuration
+* `options` ([`Options`][api-options], required)
+  — configuration
 
 ###### Returns
 
@@ -118,14 +118,14 @@ Configuration (TypeScript type).
 
 ###### Fields
 
-*   `maxSize` (`number`, default: `100 * 1024 * 1024`)
-    — max size in bytes per resource to download;
-    a `413` is sent if the resource is larger than the maximum size
-*   `secret` (`string`, **required**)
-    — HMAC key to decrypt the URLs and used by
-    [`rehype-github-image`][github-rehype-github-image]
-*   `serverName` (`string`, default: `'camomile'`)
-    — server name sent in `Via`
+* `maxSize` (`number`, default: `100 * 1024 * 1024`)
+  — max size in bytes per resource to download;
+  a `413` is sent if the resource is larger than the maximum size
+* `secret` (`string`, **required**)
+  — HMAC key to decrypt the URLs and used by
+  [`rehype-github-image`][github-rehype-github-image]
+* `serverName` (`string`, default: `'camomile'`)
+  — server name sent in `Via`
 
 ## Examples
 
