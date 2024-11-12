@@ -1,4 +1,4 @@
-# comomile
+# camomile
 
 [![Build][badge-build-image]][badge-build-url]
 [![Coverage][badge-coverage-image]][badge-coverage-url]
@@ -289,7 +289,7 @@ This project is a spiritual successor to `camo`.
 A lot of inspiration was also taken from [`go-camo`][github-cactus-camo],
 which is a modern and maintained image proxy in Go.
 
-Thanks to [**@kytta**][github-kytta] for the npm package name `comomile`!
+Thanks to [**@kytta**][github-kytta] for the npm package name `camomile`!
 
 ## License
 
