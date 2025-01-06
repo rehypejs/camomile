@@ -2,10 +2,9 @@ import assert from 'node:assert/strict'
 import {Buffer} from 'node:buffer'
 import {afterEach, beforeEach, test} from 'node:test'
 import {Camomile} from 'camomile'
+import {camo} from 'rehype-github-image'
 import {MockAgent, fetch, setGlobalDispatcher} from 'undici'
 import {securityHeaders} from './lib/constants.js'
-// To do: use published version of this plugin
-import {camo} from './rehype-github-image/camo.js'
 
 const host = '127.0.0.1'
 const port = 1080
